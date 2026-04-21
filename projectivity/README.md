@@ -20,7 +20,7 @@ projectivity/
 This plugin is distributed through the `allganize-projectivity` marketplace (the `.claude-plugin/marketplace.json` one directory up from this README).
 
 ```
-/plugin marketplace add <org>/<repo>
+/plugin marketplace add jay-lee-all/projectivity-marketplace
 /plugin install projectivity@allganize-projectivity
 /reload-plugins
 ```
