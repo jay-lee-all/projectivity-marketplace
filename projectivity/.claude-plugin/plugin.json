@@ -1,6 +1,6 @@
 {
   "name": "projectivity",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "PM runtime for the Project_OS vault. Curation, briefings, queries, audits, and scaffolding — namespaced as /projectivity:* — with a deterministic Python layer under scripts/ and per-skill convention loading driven by resolver.md.",
   "author": {
     "name": "Allganize PM Team"
