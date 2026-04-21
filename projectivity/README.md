@@ -42,6 +42,19 @@ The two runtime dependencies are:
 
 Every script takes arguments on the CLI and emits JSON on stdout. No script writes to the vault; skills do that, after PM confirmation.
 
+## Connectors
+
+> If you see unfamiliar placeholders or need to check which tools are connected, see [CONNECTORS.md](CONNECTORS.md).
+
+The plugin ships with a `.mcp.json` that pre-configures the MCP servers PMs use day-to-day. On install, Claude Code will prompt for OAuth on each one.
+
+**Included MCP connections:**
+- Chat (Slack) — team context, message scanning, surfacing todos
+- Email (Gmail) — action item discovery, follow-up tracking
+- Project tracker (Linear) — issue sync, status updates
+
+Without these connected, the plugin still works — you'll manage tasks and memory against the vault manually.
+
 ## Vault assumption
 
 Scripts expect to run against a Project_OS vault: a directory containing `team.yaml`, optional `contacts.yaml`, and `projects/<slug>/` subdirectories. The vault root is resolved via `$PROJECTIVITY_VAULT`, `--path`, or `--project` (per script).
