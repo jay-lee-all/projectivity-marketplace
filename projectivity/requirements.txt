@@ -1,0 +1,10 @@
+# Projectivity runtime dependencies.
+#
+# Install once per PM machine (or per venv) before using the plugin:
+#     pip install -r requirements.txt
+#
+# All scripts under `scripts/` import from this set; none of them require
+# anything outside the stdlib + these two libraries.
+
+python-frontmatter>=1.0
+PyYAML>=6.0

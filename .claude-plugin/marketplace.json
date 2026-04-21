@@ -1,0 +1,29 @@
+{
+  "name": "allganize-projectivity",
+  "owner": {
+    "name": "Allganize PM Team"
+  },
+  "metadata": {
+    "description": "Allganize-internal marketplace for Projectivity — the PM runtime plugin for the Project_OS vault.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "projectivity",
+      "source": "./projectivity",
+      "description": "PM runtime for the Project_OS vault. Curation, briefings, queries, audits, and scaffolding — namespaced as /projectivity:* — with a deterministic Python layer and per-skill convention loading.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Allganize PM Team"
+      },
+      "keywords": [
+        "project-management",
+        "vault",
+        "curation",
+        "obsidian",
+        "allganize"
+      ],
+      "category": "productivity"
+    }
+  ]
+}
