@@ -1,5 +1,11 @@
 ---
-description: Unified curation pass over a source (meeting MD, Slack thread, Linear dump, email, manual notes) to file decisions, actions, requirements updates, and risks into the vault. Produces a single confirmation plan covering all entity types, writes only after PM approval. Use after `meeting`, or whenever a source has accumulated enough new signal to file.
+description: Unified curation pass that turns a source (meeting MD, Slack thread, Linear dump, email, manual notes) into vault entries — decisions, actions, requirement updates, risks — in one consistent pass. Use after `meeting`, or any time a source has new signal: "file this thread", "log what came out of the call", "add a risk for the temporary rate-limit". One confirmation plan; nothing written until PM approves.
+hooks:
+  - conventions/filing-triggers.md
+  - conventions/jsonl.md
+  - conventions/references.md
+  - conventions/timestamps.md
+  - conventions/linear-tickets.md
 ---
 
 # curate — source → vault entries
@@ -14,11 +20,17 @@ Do **not** use this skill to:
 - Edit an existing requirement or risk outside the context of a source — read and edit directly.
 - Scaffold new structure — that's `scaffold`.
 
-## Conventions Loaded at Skill Start
+## Conventions
 
-**Always:** `conventions/filing-triggers.md`, `conventions/jsonl.md`, `conventions/references.md`, `conventions/timestamps.md`, `conventions/linear-tickets.md`.
+Frontmatter `hooks` declares the always-load set the resolver injects at skill start: `filing-triggers.md`, `jsonl.md`, `references.md`, `timestamps.md`, `linear-tickets.md`.
 
-**Conditionally** (load when the source touches that entity type): `conventions/md-meetings.md`, `conventions/md-requirements.md`, `conventions/md-risks.md`.
+**Conditionally load** when the plan touches an entity type:
+
+- `conventions/md-meetings.md` — if producing or updating a meeting MD.
+- `conventions/md-requirements.md` — if touching requirements.
+- `conventions/md-risks.md` — if surfacing or updating a risk.
+
+The conventions are authoritative; do not restate their contents here.
 
 ## Workflow
 
@@ -26,23 +38,7 @@ Do **not** use this skill to:
 
 2. **Plan first, write second.** Build a full plan covering every proposed entity before writing any file. Ordering matters — cross-references depend on IDs existing.
 
-   Plan structure:
-
-   ```
-   Meeting: (none, or existing [[meetings/...]])
-   Decisions:
-     - dec-NNN (decision-raised): question ...
-     - dec-NNN (decision-made): decision ..., from dec-MMM
-     - dec-NNN (decision-dropped): from dec-MMM, reason ...
-   Actions:
-     - act-NNN (task-created): what ..., who ...
-     - act-NNN (communication): what ...
-   Requirement updates:
-     - [[requirements/faq-agent]]: status active → in-progress
-   Risks:
-     - [[risks/new-risk-slug]] (new): category ..., open
-     - [[risks/existing]] (update): add Investigation paragraph
-   ```
+   Follow the shape in [templates/proposal-preview.md](templates/proposal-preview.md). That's the format the PM sees at confirmation — keep sections in the same order so the review is predictable.
 
 3. **Use filing-triggers guidance.** The "is this a decision or an action?" call is in `filing-triggers.md`; consult it. When uncertain, log it — audit filters noise later.
 
@@ -89,7 +85,25 @@ Do **not** use this skill to:
 
 - **Milestone shifts vs. trivial date tweaks.** Only log `milestone-shifted` when the shift has a reason worth preserving (scope change, blocker, customer request). Holiday reshuffles go directly to `timeline.yaml`.
 - **Meetings don't enumerate outputs.** Decisions point to meetings via `from`; meetings don't list their decisions. Obsidian backlinks handle reverse lookup.
+- **Vault location for scripts.** All script invocations resolve the project via `$PROJECTIVITY_VAULT` or `cwd/Project_OS`. If that fails, pass `--path "<absolute>/projects/<slug>"` instead of `--project <slug>`.
+
+## Verification
+
+Run before declaring done. The aim is to catch bad writes before the next skill consumes them — `audit` will surface them later, but cheaper to fix in the same session:
+
+1. **Re-validate every JSONL line you wrote.** The pre-write check in step 7 covers proposed lines; this confirms what actually landed on disk:
+   ```bash
+   python "$CLAUDE_PLUGIN_DIR/scripts/validate_jsonl.py" "projects/<slug>/decisions.jsonl"
+   python "$CLAUDE_PLUGIN_DIR/scripts/validate_jsonl.py" "projects/<slug>/actions.jsonl"
+   ```
+   Exit 0 means clean. Any non-zero is a bug introduced by the write — surface to the PM, don't silently retry.
+
+2. **Cross-references resolve.** For every new bracket ID you set as a `from`/`links`/`retires` target, confirm the target exists. `link_graph.py <id> --project <slug>` is the cheapest way — if the target is missing, `incoming` will be empty for an ID you just wrote a reference to.
+
+3. **No raised+made pair for the same question in one source.** Re-read your written decisions: if both a `decision-raised` and a `decision-made` carry `from` pointing at the same meeting and the made one resolves a question that wasn't asked elsewhere, you double-filed. The convention is "made-only when raised and made happen in the same source".
+
+4. **Aging-pending nudge fired (if applicable).** If you added a new `decision-raised`, the SKILLS-GUIDE expects you to have shown the PM existing aging-pending decisions first (see `aging_pending.py --threshold 14`). Note in the output whether you did.
 
 ## Output
 
-A structured plan shown to the PM, then (on approval) the list of files written with their paths and a summary of what changed.
+A structured plan shown to the PM (per `templates/proposal-preview.md`), then on approval: the list of files written with their paths, the verification results above, and any unresolved tokens or uncertain filings for the PM to follow up on.

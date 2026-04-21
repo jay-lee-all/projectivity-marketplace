@@ -1,5 +1,8 @@
 ---
-description: Create new vault structure — a new project, a new team member entry, new requirement/risk skeletons, or bootstrap a fresh vault. Operational, not analytical — it sets up empty-but-correct scaffolding so curation can fill it. Use when adding a project, onboarding a teammate, or starting a new deliverable that needs an MD stub.
+description: Create new vault structure — a new project, a new team member entry, requirement or risk skeletons, or bootstrap a fresh vault. Use when starting a new deliverable: "set up the new Hyundai project", "add Meera to the team", "stub out the FAQ Agent requirement". Empty-but-correct scaffolding only — curation fills the substance later.
+hooks:
+  - conventions/references.md
+  - conventions/timestamps.md
 ---
 
 # scaffold — new structure
@@ -16,15 +19,14 @@ Structure doesn't yet exist and needs to. Typical triggers:
 
 Not for: curation (`curate`), templated status (`brief`), or answering questions (`query`).
 
-## Conventions Loaded at Skill Start
+## Conventions
 
-**Always:** `conventions/references.md`, `conventions/timestamps.md`.
+Frontmatter `hooks` declares the always-load set (`references.md`, `timestamps.md`). Conditionally load:
 
-**Conditionally:**
-- New project or fresh JSONL → `conventions/jsonl.md` (for the `_schema` first line).
-- New requirement → `conventions/md-requirements.md`.
-- New risk → `conventions/md-risks.md`.
-- New meeting scaffold (rare — usually `meeting` covers this) → `conventions/md-meetings.md`.
+- `conventions/jsonl.md` — new project or fresh JSONL (for the `_schema` first line).
+- `conventions/md-requirements.md` — new requirement.
+- `conventions/md-risks.md` — new risk.
+- `conventions/md-meetings.md` — new meeting scaffold (rare; usually `meeting` covers this).
 
 ## Workflow
 
@@ -66,7 +68,28 @@ Not for: curation (`curate`), templated status (`brief`), or answering questions
 - **Slug conventions.** Project slugs are lowercase kebab-case. Requirement/risk slugs are descriptive: `pii-timeout-cascade`, not `risk-001`. The date isn't in the slug — it's in frontmatter.
 - **team.yaml is shared.** Adding a member touches a file used by every project. Confirm with the PM that the addition is correct before writing.
 - **timeline.yaml stub.** Include the expected top-level keys (`milestones:`, `done:`, `dropped:`, `deadlines:`) as empty lists so the file parses cleanly from day one.
+- **Vault location.** `next_id.py` resolves paths relatively; always pass full `--jsonl` / `--folder` paths rather than project-relative ones so the scaffold can run outside the vault cwd.
+
+## Verification
+
+Scaffolds must leave the vault in a valid state from day one, because every other skill assumes schema-clean files. Run these checks before declaring done:
+
+1. **New JSONL validates empty-but-schema-line.** Validate every JSONL file you created:
+   ```bash
+   python "$CLAUDE_PLUGIN_DIR/scripts/validate_jsonl.py" "projects/<slug>/decisions.jsonl"
+   python "$CLAUDE_PLUGIN_DIR/scripts/validate_jsonl.py" "projects/<slug>/actions.jsonl"
+   ```
+   Exit 0 confirms the `_schema` line is the only content and parses correctly. A broken scaffold means `curate` will silently append to a malformed file.
+
+2. **New MD stubs parse as frontmatter + body.** For any new requirement or risk:
+   ```bash
+   python "$CLAUDE_PLUGIN_DIR/scripts/frontmatter_index.py" \
+     "projects/<slug>/requirements" --filter id=<new-req-id>
+   ```
+   Should return exactly one entry with the full frontmatter. Unquoted values or wrong indentation break this quietly.
+
+3. **Expected directory shape exists.** After a new-project scaffold, the directory listing should show `meetings/`, `requirements/`, `risks/`, the two JSONLs, and `timeline.yaml`. Missing any of these means `brief`/`query`/`audit` will fail later with confusing path errors.
 
 ## Output
 
-A list of files/folders created, with the paths. No JSONL or MD substance beyond the scaffold shape.
+A list of files/folders created, with the paths, plus the verification results above. No JSONL or MD substance beyond the scaffold shape.

@@ -1,5 +1,9 @@
 ---
-description: Turn a meeting transcript, notes, or summary into a meeting MD under `projects/{project}/meetings/`. Precedes curate — produces only the meeting MD, never decisions/actions. Use immediately after any customer or internal meeting where the PM has raw input (transcript, audio summary, Slack recap, jotted notes). Confirmation is mandatory before writing.
+description: Turn meeting input (transcript, audio summary, Slack recap, jotted notes) into a canonical meeting MD under `projects/{project}/meetings/`. Use right after any meeting the PM just wrapped — "I just got out of a call", "recap the customer sync", "file my 1:1". Precedes `curate`; produces only the meeting MD. Confirmation mandatory.
+hooks:
+  - conventions/md-meetings.md
+  - conventions/timestamps.md
+  - conventions/references.md
 ---
 
 # meeting — transcript → meeting MD
@@ -14,9 +18,9 @@ Do **not** use this skill for:
 - Editing an existing meeting MD — read it and edit directly (convention: `md-meetings.md`).
 - Routine standups with no project content — skip the skill, skip the MD.
 
-## Conventions Loaded at Skill Start
+## Conventions
 
-`conventions/md-meetings.md`, `conventions/timestamps.md`, `conventions/references.md`. These are the authoritative rules for frontmatter, body, and wikilinks — consult them; do not restate their contents in this SKILL.md.
+Declared in frontmatter `hooks` — the resolver loads `md-meetings.md`, `timestamps.md`, and `references.md` at skill start. These are the authoritative rules for frontmatter, body, and wikilinks. Consult them when drafting; do not restate their contents here.
 
 ## Workflow
 
@@ -68,6 +72,22 @@ Do **not** use this skill for:
 - **Korean names.** Transcripts frequently mix Korean and English for the same person. Use `resolve_name.py` with the Korean name as a token if it appears in `team.yaml`'s `name` field.
 - **No body template.** Don't force a rigid outline — meeting content varies. The convention gives shape, not structure.
 - **Skip trivial standups.** If the meeting produced nothing project-relevant, don't create an MD. Tell the PM and move on.
+- **Vault location for scripts.** `meeting_context.py` and `next_id.py` resolve the vault via `$PROJECTIVITY_VAULT` or `cwd/Project_OS`. If the PM runs you from an unusual cwd and gets a "project directory not found" error, fall back to `--path "<absolute vault path>/projects/<slug>"` explicitly instead of `--project <slug>`.
+
+## Verification
+
+Before declaring the skill done, run these checks. They're cheap and catch the class of errors that makes the MD unusable downstream:
+
+1. **Frontmatter parses.** The file is readable as YAML frontmatter + body. Mis-indented or unquoted fields break `frontmatter_index.py` for every subsequent read. A quick sanity check:
+   ```bash
+   python "$CLAUDE_PLUGIN_DIR/scripts/frontmatter_index.py" \
+     "projects/<slug>/meetings" --filter id=<just-written-meet-id>
+   ```
+   Should return exactly one entry with the full frontmatter you intended.
+
+2. **No unresolved attendee tokens silently filed.** Re-run `resolve_name.py` over the `attendees:` list you wrote. Everything should land in `matches`, not `unresolved`. If anything is still unresolved, surface it to the PM — don't ship the MD with raw Slack IDs.
+
+3. **Wikilinks are real paths.** Every `[[meetings/...]]` or `[[requirements/...]]` you referenced in the body should point at a file that exists. One missed typo turns into an orphan the `audit` skill will flag later.
 
 ## Output
 
@@ -75,4 +95,5 @@ After confirmation and write:
 
 - The meeting MD path (relative to vault root).
 - A 1-line summary of what went in.
+- Any unresolved attendee tokens or missing-target wikilinks surfaced by verification.
 - A suggestion to run `curate` next if there are decisions/actions to extract.

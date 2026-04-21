@@ -1,5 +1,13 @@
 ---
-description: Read-only integrity check across a project vault. Surfaces schema violations, orphan references, stale entries, broken wikilinks, thin MDs, and inconsistent names. Never auto-fixes — reports only. Use periodically (weekly or before a release) or after major curation work to catch drift before it compounds.
+description: Read-only integrity check across a project vault — schema violations, orphan references, stale raised decisions, aging risks, thin MDs, name inconsistencies. Use weekly, before a release, or after heavy curation: "audit the vault", "what's broken in Project_OS", "check for orphans". Never auto-fixes — reports findings; the PM (or `curate`) acts on them.
+hooks:
+  - conventions/jsonl.md
+  - conventions/references.md
+  - conventions/timestamps.md
+  - conventions/linear-tickets.md
+  - conventions/md-meetings.md
+  - conventions/md-requirements.md
+  - conventions/md-risks.md
 ---
 
 # audit — vault integrity check
@@ -17,9 +25,9 @@ Regular hygiene pass: weekly, after heavy curation, or before shipping a plugin 
 
 Read-only by contract. The PM (or `curate`) acts on audit findings; the audit skill does not.
 
-## Conventions Loaded at Skill Start
+## Conventions
 
-All of them. Audit needs the full rule set: `conventions/jsonl.md`, `conventions/references.md`, `conventions/timestamps.md`, `conventions/linear-tickets.md`, `conventions/md-meetings.md`, `conventions/md-requirements.md`, `conventions/md-risks.md`.
+Frontmatter `hooks` declares the full convention set — audit inspects every entity type, so it loads everything: `jsonl.md`, `references.md`, `timestamps.md`, `linear-tickets.md`, `md-meetings.md`, `md-requirements.md`, `md-risks.md`.
 
 ## Workflow
 
@@ -78,6 +86,17 @@ All of them. Audit needs the full rule set: `conventions/jsonl.md`, `conventions
 - **`check-resolvable` is plugin-maintainer scope.** Audit covers vault data, not plugin health (resolver/skill drift). Those are separate concerns.
 - **False positives.** Thin-MD and stale-decision heuristics will catch legitimate cases (a decision-raised is legitimately paused waiting on a customer). Surface with context, let the PM judge.
 - **Cross-project orphans.** `[prj-002:dec-001]` is an orphan if `prj-002` doesn't exist or `dec-001` isn't there. Only audit cross-references when the peer project is accessible.
+- **Vault location.** Scripts use `$PROJECTIVITY_VAULT` or `cwd/Project_OS`. If they fail to find the project, fall back to `--path "<absolute>/projects/<slug>"`.
+
+## Verification
+
+The audit produces a report; the verification step makes sure the report itself is trustworthy:
+
+1. **Every reported finding includes a path or bracket ID.** A finding without a locator ("there are some orphans") is useless — the PM can't act on it. If your script output is missing locators, fix the script call (most accept identifying flags) before reporting.
+
+2. **No section silently empty.** If "Orphan references" has zero findings, write `None.` rather than omitting the heading. Silent omission is indistinguishable from "I forgot to check that category" — both leave the PM unsure whether the system is healthy or whether the audit was incomplete.
+
+3. **Script exit codes respected.** `validate_jsonl.py` returns 2 on failure with details on stderr. If you swallow stderr, the audit will report "no schema violations" while violations exist. Always capture and surface stderr for non-zero exits.
 
 ## Output
 
