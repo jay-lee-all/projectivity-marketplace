@@ -49,9 +49,9 @@ Frontmatter `hooks` declares the always-load set (`references.md`, `timestamps.m
 
    - **New team member:** Append to the existing `team.yaml` list. Fields per existing records: `name`, `email`, `slack`, `slack_name`, `github`, `linear`, `team`, `role`. Don't reorder existing entries.
 
-   - **New requirement:** Frontmatter with `id`, `title`, `status: active`, `when_created` (KST now), `who`, `project`. Body skeleton: `## Spec`, `## Updates`.
+   - **New requirement:** Frontmatter with `id`, `title`, `status: active`, `when_created` (now, naive ISO 8601 per `timestamps.md`), `who`, `project`. Body skeleton: `## Spec`, `## Updates`.
 
-   - **New risk:** Frontmatter with `id`, `title`, `when_surfaced` (KST now), empty `when_resolved`, `who`, `category`. Body: opening line + reference to what surfaced it.
+   - **New risk:** Frontmatter with `id`, `title`, `when_surfaced` (now, naive ISO 8601 per `timestamps.md`), empty `when_resolved`, `who`, `category`. Body: opening line + reference to what surfaced it.
 
 4. **Get IDs from `next_id.py`.** Never invent sequential IDs.
 

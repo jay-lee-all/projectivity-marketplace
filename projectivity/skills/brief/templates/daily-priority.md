@@ -48,7 +48,7 @@ Read `projects/<slug>/timeline.yaml`; filter `milestones:` where `date` ≤ toda
 
 ## Footer
 
-`_Generated {YYYY-MM-DD HH:MM KST}. Data from {N} projects._`
+`_Generated {YYYY-MM-DD HH:MM}. Data from {N} projects._` (time is KST — see `conventions/timestamps.md`; no offset suffix.)
 
 ## Notes for the skill
 

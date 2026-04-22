@@ -61,7 +61,7 @@ The format below is the contract. Keep section order stable; PMs get faster at r
 
 - [[risks/<slug>]] (new): <title>
     category: <infrastructure / model / integration / configuration / customer / process>
-    when_surfaced: <KST now>
+    when_surfaced: <now, naive ISO 8601 — see conventions/timestamps.md>
     who: <surfacer>
     opening line: <one sentence>
     reversion conditions: <only for category: configuration — per filing-triggers.md>

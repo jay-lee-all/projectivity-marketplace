@@ -110,16 +110,34 @@ def load_yaml(path: Path):
 
 
 def parse_kst(ts: str) -> datetime | None:
-    """Parse an ISO 8601 KST timestamp, or a date-only `YYYY-MM-DD`."""
+    """Parse a vault timestamp.
+
+    Accepts:
+      - date-only `YYYY-MM-DD` (interpreted as midnight KST)
+      - naive ISO 8601 `YYYY-MM-DDTHH:MM:SS` (the canonical vault format —
+        KST is implicit, no offset is written)
+      - tz-aware ISO 8601 with `+09:00` (legacy entries written before the
+        offset was dropped — still readable)
+
+    Returns a tz-aware datetime in KST, or None on parse failure.
+    """
     if not ts:
         return None
     try:
         if len(ts) == 10 and ts[4] == "-" and ts[7] == "-":
             return datetime.fromisoformat(ts).replace(tzinfo=KST)
-        return datetime.fromisoformat(ts)
+        dt = datetime.fromisoformat(ts)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=KST)
+        return dt
     except ValueError:
         return None
 
 
 def now_kst() -> datetime:
     return datetime.now(KST)
+
+
+def now_kst_str() -> str:
+    """Canonical 'now' string for the vault: naive ISO 8601, KST implicit."""
+    return datetime.now(KST).strftime("%Y-%m-%dT%H:%M:%S")

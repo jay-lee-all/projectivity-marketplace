@@ -20,7 +20,7 @@ from pathlib import Path
 # Make sibling modules importable regardless of how the script was invoked.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from _common import emit, iter_jsonl, now_kst, parse_kst, project_root  # noqa: E402
+from _common import emit, iter_jsonl, now_kst, now_kst_str, parse_kst, project_root  # noqa: E402
 
 
 def main() -> None:
@@ -98,7 +98,7 @@ def main() -> None:
     out = {
         "project": proj.name,
         "threshold_days": args.threshold,
-        "as_of": now_kst().isoformat(),
+        "as_of": now_kst_str(),
         "aging_decisions": aging_decisions,
     }
     if args.include_tasks:

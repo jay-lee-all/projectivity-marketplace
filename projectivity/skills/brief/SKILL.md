@@ -54,7 +54,7 @@ Briefings are read-only, so there's less to verify than a curation write — but
 
 1. **Every template section rendered.** If the template declares five sections, the output has five headings in that order. Empty sections say `None.` rather than being dropped.
 2. **Data matches the scripts.** Counts in the briefing prose match counts in the JSON the scripts returned. If a PM sees "3 aging decisions" in the prose, `aging_pending.py` should have returned 3 aging_decisions — if there's a delta, you hand-edited something you shouldn't have.
-3. **Timestamp is present and KST.** The footer shows when data was pulled, in KST. Missing timestamp is a bug — a briefing without "as of X" is indistinguishable from stale cache.
+3. **Timestamp is present.** The footer shows when data was pulled (KST is implicit per `conventions/timestamps.md`; no offset suffix). Missing timestamp is a bug — a briefing without "as of X" is indistinguishable from stale cache.
 
 ## Output
 

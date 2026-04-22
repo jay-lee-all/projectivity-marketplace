@@ -16,7 +16,7 @@ id: req-NNN
 title: <human-readable>
 status: active | in-progress | done | deferred | descoped | retired
 who: <owner, name from team.yaml or contacts.yaml>
-when_created: 2026-02-20T14:30:00+09:00
+when_created: 2026-02-20T14:30:00
 when_completed:                            # empty until status=done
 ---
 ```
@@ -29,7 +29,7 @@ when_completed:                            # empty until status=done
   - `deferred` — paused, may resume
   - `descoped` — removed from scope
   - `retired` — consolidated into or replaced by another requirement; body should wikilink to the replacement
-- `when_created` is full ISO 8601 with KST (`+09:00`).
+- `when_created` is naive ISO 8601 — KST is implicit, no `+09:00` suffix (see `timestamps.md`).
 - `when_completed` is empty unless `status == done`. Presence is the signal — no separate flag.
 
 ## Body
@@ -76,6 +76,6 @@ When the transition is also a decision, log a `decisions.jsonl` entry and includ
 - [ ] `id` is unique across this project's `requirements/*.md`.
 - [ ] `status` is one of the six legal values.
 - [ ] `who` matches `team.yaml` or `contacts.yaml` exactly.
-- [ ] `when_created` has KST offset.
+- [ ] `when_created` is naive ISO 8601 (no `+09:00` suffix).
 - [ ] `when_completed` is present iff `status == done`.
 - [ ] Body wikilinks and bracket IDs resolve.

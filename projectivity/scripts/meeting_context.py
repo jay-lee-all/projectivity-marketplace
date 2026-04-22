@@ -27,6 +27,7 @@ from _common import (  # noqa: E402
     iter_jsonl,
     load_frontmatter,
     now_kst,
+    now_kst_str,
     parse_kst,
     project_root,
 )
@@ -135,7 +136,7 @@ def main() -> None:
 
     emit({
         "project": str(proj.name),
-        "as_of": now_kst().isoformat(),
+        "as_of": now_kst_str(),
         "lookback_days": args.lookback_days,
         "prior_meetings": meetings,
         "recent_decisions_made": recent_made[: args.max_items],

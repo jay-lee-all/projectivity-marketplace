@@ -33,8 +33,9 @@ from _common import emit, iter_jsonl  # noqa: E402
 
 
 ID_RE = re.compile(r"^(dec|act)-\d{3,5}$")
+# Naive ISO 8601 — KST is implicit, no offset written. See conventions/timestamps.md.
 KST_TS_RE = re.compile(
-    r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+09:00$"
+    r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$"
 )
 BRACKET_ANY_RE = re.compile(r"^\[(dec|act|req|meet|risk)-\d{3,5}\]$")
 BRACKET_DEC_RE = re.compile(r"^\[dec-\d{3,5}\]$")
@@ -76,7 +77,7 @@ def validate_decision(entry: dict, line_no: int, errors: list[str]) -> None:
     if entry.get("id") and not ID_RE.match(str(entry["id"])):
         errors.append(f"line {line_no} ({eid}): id does not match dec-NNN shape")
     if entry.get("when") and not KST_TS_RE.match(str(entry["when"])):
-        errors.append(f"line {line_no} ({eid}): when must be ISO 8601 +09:00")
+        errors.append(f"line {line_no} ({eid}): when must be naive ISO 8601 (YYYY-MM-DDTHH:MM:SS, KST implicit, no offset)")
     if typ and typ not in DECISION_TYPES:
         errors.append(f"line {line_no} ({eid}): unknown type `{typ}`")
 
@@ -130,7 +131,7 @@ def validate_action(entry: dict, line_no: int, errors: list[str]) -> None:
     if entry.get("id") and not ID_RE.match(str(entry["id"])):
         errors.append(f"line {line_no} ({eid}): id does not match act-NNN shape")
     if entry.get("when") and not KST_TS_RE.match(str(entry["when"])):
-        errors.append(f"line {line_no} ({eid}): when must be ISO 8601 +09:00")
+        errors.append(f"line {line_no} ({eid}): when must be naive ISO 8601 (YYYY-MM-DDTHH:MM:SS, KST implicit, no offset)")
     if typ and typ not in ACTION_TYPES:
         errors.append(f"line {line_no} ({eid}): unknown type `{typ}`")
 

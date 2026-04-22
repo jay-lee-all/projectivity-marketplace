@@ -77,10 +77,10 @@ The conventions are authoritative; do not restate their contents here.
 - **Raised then made in the same source.** Don't file both `decision-raised` and `decision-made` — if the question was asked and answered in the same meeting, file only the `decision-made`. `from` points to the meeting wikilink, not a non-existent raised entry.
 - **`retires` rules are strict.** `decision-made` → `decision-made` only. Actions.retires → `[act-NNN]` only. **Never** target MD entities (`[req-NNN]`, `[risk-NNN]`, `[meet-NNN]`) in any `retires` array — MDs retire via frontmatter. The validator catches this, but the plan shouldn't propose it.
 - **Linear tickets are bare tokens.** `FDSE-1509`, not `[FDSE-1509]`. Place them inline in `context`/`what` or in `links` arrays as plain strings.
-- **KST everywhere.** Every JSONL `when` ends in `+09:00`. Meeting dates are date-only. Get "now" from the shell, not from training data:
+- **KST everywhere, no offset written.** Every JSONL `when` is naive ISO 8601 (`YYYY-MM-DDTHH:MM:SS`) — KST is implicit, never write `+09:00`. Meeting dates are date-only. Get "now" from the shell, not from training data:
 
   ```bash
-  python -c "from datetime import datetime, timezone, timedelta; print(datetime.now(timezone(timedelta(hours=9))).strftime('%Y-%m-%dT%H:%M:%S+09:00'))"
+  python -c "from datetime import datetime, timezone, timedelta; print(datetime.now(timezone(timedelta(hours=9))).strftime('%Y-%m-%dT%H:%M:%S'))"
   ```
 
 - **Milestone shifts vs. trivial date tweaks.** Only log `milestone-shifted` when the shift has a reason worth preserving (scope change, blocker, customer request). Holiday reshuffles go directly to `timeline.yaml`.

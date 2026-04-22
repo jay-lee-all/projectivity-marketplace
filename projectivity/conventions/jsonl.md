@@ -19,7 +19,7 @@ Rules for `core/decisions.jsonl` and `core/actions.jsonl`. Loaded by any skill t
 ## Timestamps
 
 - Field name: `when`.
-- Format: ISO 8601 with KST offset: `2026-02-20T14:30:00+09:00`.
+- Format: naive ISO 8601, KST implied: `2026-02-20T14:30:00`. No `+09:00` suffix — see `timestamps.md`.
 - Minute precision is enough. Seconds can be `:00`.
 - `when` records when the event occurred, not when it was logged (use the meeting time for events extracted from a meeting).
 
@@ -92,7 +92,7 @@ When a `decision-made` spawns actions, include the decision's bracket ID in each
 
 - [ ] Last `id` in the file was read, new id is `previous + 1`.
 - [ ] Type-specific required fields are present (see type tables above).
-- [ ] `when` is ISO 8601 with `+09:00`.
+- [ ] `when` is naive ISO 8601 (`YYYY-MM-DDTHH:MM:SS`, no offset).
 - [ ] Names in `who` and `checked` match `team.yaml` or `contacts.yaml` exactly.
 - [ ] No empty strings, no empty arrays, no nulls.
 - [ ] `retires` entries are same-schema bracket IDs.

@@ -13,14 +13,14 @@ Rules for `projects/{project}/risks/{slug}.md`. Loaded by `curate`, `audit`, and
 ---
 id: risk-NNN
 title: <human-readable>
-when_surfaced: 2026-03-18T13:00:00+09:00
+when_surfaced: 2026-03-18T13:00:00
 when_resolved:                    # empty while open
 who: <owner, name from team.yaml>
 category: infrastructure | model | integration | configuration | customer | process
 ---
 ```
 
-- `when_surfaced` and `when_resolved` are ISO 8601 with KST. `when_resolved` empty ⇒ open.
+- `when_surfaced` and `when_resolved` are naive ISO 8601 (KST implicit, no `+09:00` suffix — see `timestamps.md`). `when_resolved` empty ⇒ open.
 - `category` is the working set — an open vocabulary, not a closed enum. If a real risk genuinely doesn't fit one of these, the curation flow can propose a new category for the PM to confirm; don't force a bad fit. Additions become proposed updates to this file.
 
 ## Body
@@ -79,8 +79,8 @@ Frontmatter `when_resolved` is the sole source of truth for whether a risk is op
 ## Validation checklist
 
 - [ ] `id` is unique across this project's `risks/*.md`.
-- [ ] `when_surfaced` has KST offset.
-- [ ] `when_resolved` is either empty or a KST ISO 8601 string.
+- [ ] `when_surfaced` is naive ISO 8601 (no `+09:00` suffix).
+- [ ] `when_resolved` is either empty or a naive ISO 8601 string.
 - [ ] `who` matches `team.yaml` or `contacts.yaml`.
 - [ ] `category` is from the working set (or PM-confirmed addition).
 - [ ] Temporary mitigation risks name the reversion/formalization conditions in the body.
