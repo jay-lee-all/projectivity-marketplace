@@ -16,6 +16,7 @@ Each skill declares its convention set via frontmatter `hooks` (skill-start inje
 | `query` | Execution (read-only) | `references.md`, `timestamps.md` | `jsonl.md` (questions over decisions/actions), `md-requirements.md` / `md-risks.md` / `md-meetings.md` (per entity type the question touches), `linear-tickets.md` (if ticket IDs appear) |
 | `audit` | Utility (read-only) | `jsonl.md`, `references.md`, `timestamps.md`, `linear-tickets.md`, `md-meetings.md`, `md-requirements.md`, `md-risks.md` | — (audit inspects everything) |
 | `scaffold` | Utility | `references.md`, `timestamps.md` | `md-requirements.md` (new requirement), `md-risks.md` (new risk), `md-meetings.md` (new meeting scaffolds), `jsonl.md` (if pre-seeding JSONL schema headers) |
+| `edit` | Utility (target-driven mutation) | `edit-discipline.md`, `references.md`, `timestamps.md` | `jsonl.md` (JSONL line edit), `md-meetings.md` (meeting frontmatter), `md-requirements.md` (requirement frontmatter or `## Updates` cascade), `md-risks.md` (risk frontmatter or `## Resolution` cascade), `linear-tickets.md` (Linear token added to `links`) |
 
 `filing-triggers.md` is **curate-only** — it's judgment guidance for "does this become a decision, an action, or a risk?" Other skills don't need it because they don't file; they read what's already filed.
 
@@ -33,6 +34,10 @@ Used by ad-hoc invocations where Claude is editing the vault without going throu
 | Deciding "is this a decision or an action?" | `filing-triggers.md` |
 | Deciding "is this a risk or a decision-raised?" | `filing-triggers.md` + `md-risks.md` |
 | Adding a new category or type value | check the relevant convention's working-set guidance first; propose, don't force-fit |
+| Editing an existing JSONL line, MD frontmatter, YAML field, or timeline entry | `edit-discipline.md` + the kind-specific convention (`jsonl.md` / `md-*.md`) + `references.md` + `timestamps.md` |
+| Marking a milestone done / shifted / dropped | `edit-discipline.md` + `jsonl.md` (cascaded action append) + `timestamps.md` |
+| Updating a person's role / slack / email in `team.yaml` or project `contacts.yaml` | `edit-discipline.md` + `references.md` (name resolution constraints) |
+| Logging an entry to `core/edits.jsonl` | `edit-discipline.md` (schema definition lives there, not in `jsonl.md`) |
 
 ## File type → conventions (fallback)
 
@@ -46,6 +51,7 @@ If intent is unclear and only the file path is known, load by extension.
 | `**/risks/*.md` | `md-risks.md` + `references.md` + `timestamps.md` |
 | `**/timeline.yaml` | `timestamps.md` + `references.md` (for `ms-NNN` / `dl-NNN` usage notes) |
 | `**/team.yaml`, `**/contacts.yaml` | `references.md` (name resolution) |
+| `**/core/edits.jsonl` | `edit-discipline.md` (defines the `edits-v1` schema) |
 
 ## What the resolver does NOT do
 

@@ -155,3 +155,23 @@ def now_kst() -> datetime:
 def now_kst_str() -> str:
     """Canonical 'now' string for the vault: naive ISO 8601, KST implicit."""
     return datetime.now(KST).strftime("%Y-%m-%dT%H:%M:%S")
+
+
+def atomic_write(path: Path, content: str | bytes) -> None:
+    """Write content to path atomically: write to a sibling .tmp, fsync, rename.
+
+    Used by edit-skill mutators (update_jsonl_line, update_yaml_field,
+    timeline_ops, update_frontmatter, append_edit_log). Vault data is not
+    regenerable; a Python crash mid-write must not corrupt the target.
+    """
+    path = Path(path)
+    if isinstance(content, str):
+        data = content.encode("utf-8")
+    else:
+        data = content
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    with tmp.open("wb") as fh:
+        fh.write(data)
+        fh.flush()
+        os.fsync(fh.fileno())
+    os.replace(tmp, path)

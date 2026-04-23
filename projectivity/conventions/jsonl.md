@@ -6,7 +6,7 @@ Rules for `core/decisions.jsonl` and `core/actions.jsonl`. Loaded by any skill t
 
 - First line is always `{"_schema": { ... }}`. The harness skips it when processing entries.
 - Every data entry has at minimum `id` and `when`. Other required fields are type-dependent (see below).
-- Append-only. **Never edit or delete existing lines.** Mutations are expressed as new entries that reference the old via `from` or `retires`.
+- Append-only. **Never edit or delete existing lines.** Mutations are expressed as new entries that reference the old via `from` or `retires`. The narrow exception is the `edit` skill, which may correct whitelist fields (`who`, `links`, `from`, `context`, `retires`, `status`, time-part of `when`) on a single line via `update_jsonl_line.py`. Semantic fields (`type`, `question`, `decision`, `what`, the date part of `when`) remain immutable — supersede via a new entry. See `edit-discipline.md` for the full whitelist matrix.
 - Soft delete uses `"status": "archived"` — the line stays.
 - Omit fields that don't apply. No `null`, no `""`, no `[]`.
 
@@ -86,6 +86,10 @@ Type constraints on `from` (file-level — the validator surfaces these as warni
 - A single `task-created` should have **at most one** closure — either one `task-done` or a `retires` from a milestone, never both, and never two `task-done`s. Two closures pointing at the same `task-created` mean the original was too broad; split it.
 
 `milestone-shifted`: the `what` field must contain old date, new date, and reason. The shifted milestone is referenced as `ms-NNN` inline in `what` (timeline IDs are not bracket IDs).
+
+## `edits-v1` (opt-in audit log)
+
+`core/edits.jsonl` is an opt-in audit log written by the `edit` skill. The schema (`{"_schema": "edits-v1"}`) and entry shape are defined in `edit-discipline.md` — not duplicated here. The file is lazy-created on the first edit; `audit` reads it if present and treats absence as "no edits yet."
 
 ## Substance rule
 

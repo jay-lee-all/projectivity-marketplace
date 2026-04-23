@@ -29,6 +29,7 @@ Six top-level entries under `projects/<slug>/`: one file (`overview.md`), one `c
 - **Don't invent new top-level per-project folders.** If a new shape is needed, update this convention first so every skill sees the same layout.
 - **`overview.md` and `core/contacts.yaml` are scaffold-populated.** Their shape is defined in `projectivity/skills/scaffold/templates/`. Every other file is a shell until `curate` or `meeting` fills it.
 - **`core/curate-state.yaml` is machine-maintained.** Scaffold creates it with empty per-source stubs seeded from `overview.md`. Curate is the only subsequent writer. Never edit by hand. See `conventions/curate-state.md` for the schema and contract.
+- **`core/edits.jsonl` is opt-in and lazy.** Created by the `edit` skill on the first edit a project receives — never by `scaffold`. `audit` reads it if present, treats absence as "no edits yet." Schema (`edits-v1`) is defined in `edit-discipline.md`.
 - **`_files/` is for attachments.** Scaffold creates it empty. It should be listed in the vault's `.gitignore` (`projects/*/_files/`). Scaffold surfaces this as a recommendation in its output — it does **not** edit the vault's `.gitignore` directly.
 
 ## Why empty subfolders
