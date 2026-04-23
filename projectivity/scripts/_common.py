@@ -10,9 +10,9 @@ import json
 import os
 import re
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
-from typing import Iterator
+from typing import Any, Iterator
 
 try:
     import frontmatter  # python-frontmatter
@@ -40,9 +40,23 @@ def fail(msg: str, code: int = 1) -> None:
     sys.exit(code)
 
 
+def _json_default(o: Any) -> Any:
+    # python-frontmatter returns datetime.date for YAML date fields; stringify
+    # these (and datetime / Path) so emit() can serialize frontmatter as-is.
+    if isinstance(o, datetime):
+        return o.isoformat()
+    if isinstance(o, date):
+        return o.isoformat()
+    if isinstance(o, Path):
+        return str(o)
+    raise TypeError(f"Object of type {type(o).__name__} is not JSON serializable")
+
+
 def emit(obj) -> None:
     """Print JSON result to stdout (one-shot, non-streaming)."""
-    sys.stdout.write(json.dumps(obj, ensure_ascii=False, indent=2) + "\n")
+    sys.stdout.write(
+        json.dumps(obj, ensure_ascii=False, indent=2, default=_json_default) + "\n"
+    )
 
 
 def project_root(project: str | None, explicit_path: str | None = None) -> Path:

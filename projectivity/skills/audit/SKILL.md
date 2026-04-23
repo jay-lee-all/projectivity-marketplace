@@ -8,6 +8,7 @@ hooks:
   - conventions/md-meetings.md
   - conventions/md-requirements.md
   - conventions/md-risks.md
+  - conventions/project-shape.md
 ---
 
 # audit — vault integrity check
@@ -27,30 +28,34 @@ Read-only by contract. The PM (or `curate`) acts on audit findings; the audit sk
 
 ## Conventions
 
-Frontmatter `hooks` declares the full convention set — audit inspects every entity type, so it loads everything: `jsonl.md`, `references.md`, `timestamps.md`, `linear-tickets.md`, `md-meetings.md`, `md-requirements.md`, `md-risks.md`.
+Frontmatter `hooks` declares the full convention set — audit inspects every entity type, so it loads everything: `jsonl.md`, `references.md`, `timestamps.md`, `linear-tickets.md`, `md-meetings.md`, `md-requirements.md`, `md-risks.md`, `project-shape.md`.
 
 ## Workflow
 
 1. **Scope the audit.** Per-project by default. Cross-project audit is a distinct invocation — confirm which with the PM if ambiguous.
 
-2. **JSONL schema check.**
+2. **Canonical project shape.** For each `projects/<slug>/` in scope, verify every entry listed in `conventions/project-shape.md` exists: `overview.md`, the `core/` directory with its four files (`decisions.jsonl`, `actions.jsonl`, `timeline.yaml`, `contacts.yaml`), and the four content subfolders (`meetings/`, `requirements/`, `risks/`, `_files/`). A plain `ls` is sufficient — no script needed. Missing entries are **scaffold bugs**, not curation ones; flag under a dedicated report section (see step 10) so they route to the right fix. Empty subfolders are **not** findings — they're the contract.
+
+3. **JSONL schema check.**
 
    ```bash
-   python "$CLAUDE_PLUGIN_DIR/scripts/validate_jsonl.py" "projects/<slug>/decisions.jsonl"
-   python "$CLAUDE_PLUGIN_DIR/scripts/validate_jsonl.py" "projects/<slug>/actions.jsonl"
+   python "$CLAUDE_PLUGIN_DIR/scripts/validate_jsonl.py" "projects/<slug>/core/decisions.jsonl"
+   python "$CLAUDE_PLUGIN_DIR/scripts/validate_jsonl.py" "projects/<slug>/core/actions.jsonl"
    ```
 
    Non-zero exit means structural violations. List them verbatim — don't paraphrase.
 
-3. **Orphan references.** For every bracket ID referenced (`from`, `links`, `retires`, body wikilinks), confirm the target exists:
+4. **Orphan references.** One pass across the whole project:
 
    ```bash
-   python "$CLAUDE_PLUGIN_DIR/scripts/link_graph.py" <some-id> --project <slug>
+   python "$CLAUDE_PLUGIN_DIR/scripts/reconcile_cross_refs.py" --project <slug>
    ```
 
-   Cross-check against the union of all defined IDs in JSONL + MD frontmatter.
+   Returns `defined_ids`, `references`, `orphans`, and `defined_but_unreferenced`. Every entry in `orphans` is a real finding — it names a target that's referenced somewhere but never defined. `defined_but_unreferenced` is informational (not every defined ID must have incoming refs; a newly-filed `decision-made` often has none yet).
 
-4. **Stale raised decisions.**
+   For a deep-dive on any single orphan (who points at it, what field, what context), `link_graph.py <id> --project <slug>` is the follow-up tool.
+
+5. **Stale raised decisions.**
 
    ```bash
    python "$CLAUDE_PLUGIN_DIR/scripts/aging_pending.py" --project <slug> --threshold 30
@@ -58,27 +63,41 @@ Frontmatter `hooks` declares the full convention set — audit inspects every en
 
    Surface anything older than 30 days with no `from`-closure. This is stricter than `brief`'s 14-day nudge — audit catches the long-forgotten ones.
 
-5. **Open risks past category-specific thresholds.** Infrastructure risks open > 14 days, customer risks open > 30 days, etc. Use `frontmatter_index.py` with `--filter when_resolved=` to pull open risks, then compare `when_surfaced` against thresholds.
+6. **Open risks past category-specific thresholds.** Use `filter_by_age.py` — one call per category with its threshold:
 
-6. **Name consistency.** Run `resolve_name.py` over every `who` field in JSONL + every `attendees` entry in meeting MDs. Flag tokens that fall into the `unresolved` bucket or that resolve via different fields across files (e.g. one entry uses the Slack ID, another uses the name).
-
-7. **Thin MDs.** Requirements with `status: active` but an empty Spec section. Risks with no Investigation section and `when_surfaced` older than 7 days. Heuristic, not strict — call these out as "likely thin" and let the PM decide.
-
-8. **Temporary-mitigation drift.** Risks with `category: configuration` that have no reversion/formalization conditions in the body. The convention requires these; audit enforces.
-
-9. **Report.** One grouped findings document:
-
-   ```
-   ## Schema violations
-   ## Orphan references
-   ## Stale raised decisions
-   ## Aging open risks
-   ## Name inconsistencies
-   ## Thin MDs
-   ## Temporary-mitigation drift
+   ```bash
+   # Infrastructure / integration: > 14 days open
+   python "$CLAUDE_PLUGIN_DIR/scripts/filter_by_age.py" \
+     --folder "projects/<slug>/risks" --field when_surfaced \
+     --min-days 14 --filter category=infrastructure --filter when_resolved=
+   # Customer / process: > 30 days open
+   python "$CLAUDE_PLUGIN_DIR/scripts/filter_by_age.py" \
+     --folder "projects/<slug>/risks" --field when_surfaced \
+     --min-days 30 --filter category=customer --filter when_resolved=
    ```
 
-   Each finding names the file/line/ID. The PM reads, triages, and acts — audit does not.
+   `--filter when_resolved=` matches the empty string, i.e. still-open risks. Each call returns entries with `age_days` computed; no date arithmetic in-skill.
+
+7. **Name consistency.** Run `resolve_name.py` over every `who` field in JSONL + every `attendees` entry in meeting MDs. Flag tokens that fall into the `unresolved` bucket or that resolve via different fields across files (e.g. one entry uses the Slack ID, another uses the name).
+
+8. **Thin MDs.** Requirements with `status: active` but an empty Spec section. Risks with no Investigation section and `when_surfaced` older than 7 days. Heuristic, not strict — call these out as "likely thin" and let the PM decide.
+
+9. **Temporary-mitigation drift.** Risks with `category: configuration` that have no reversion/formalization conditions in the body. The convention requires these; audit enforces.
+
+10. **Report.** One grouped findings document:
+
+    ```
+    ## Canonical shape violations
+    ## Schema violations
+    ## Orphan references
+    ## Stale raised decisions
+    ## Aging open risks
+    ## Name inconsistencies
+    ## Thin MDs
+    ## Temporary-mitigation drift
+    ```
+
+    Each finding names the file/line/ID. The PM reads, triages, and acts — audit does not.
 
 ## Gotchas
 
