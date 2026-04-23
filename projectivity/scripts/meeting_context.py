@@ -63,7 +63,7 @@ def main() -> None:
     meetings = meetings[-args.max_items:]
 
     # 2. Recent decisions made + currently raised.
-    dec_path = proj / "decisions.jsonl"
+    dec_path = proj / "core" / "decisions.jsonl"
     recent_made = []
     raised_open: list[dict] = []
     raised: dict[str, dict] = {}
@@ -111,7 +111,7 @@ def main() -> None:
     attendee_set = {a.lower() for a in args.attendees}
     tasks = []
     if attendee_set:
-        act_path = proj / "actions.jsonl"
+        act_path = proj / "core" / "actions.jsonl"
         completed_from: set[str] = set()
         all_tasks: dict[str, dict] = {}
         for entry in iter_jsonl(act_path):

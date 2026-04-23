@@ -39,7 +39,7 @@ def main() -> None:
     # Pending raised.
     raised: dict[str, dict] = {}
     closed: set[str] = set()
-    for entry in iter_jsonl(proj / "decisions.jsonl"):
+    for entry in iter_jsonl(proj / "core" / "decisions.jsonl"):
         t = entry.get("type")
         if t == "decision-raised":
             ident = entry.get("id")
@@ -71,7 +71,7 @@ def main() -> None:
     if args.include_tasks:
         tasks: dict[str, dict] = {}
         completed: set[str] = set()
-        for entry in iter_jsonl(proj / "actions.jsonl"):
+        for entry in iter_jsonl(proj / "core" / "actions.jsonl"):
             t = entry.get("type")
             if t == "task-created":
                 ident = entry.get("id")

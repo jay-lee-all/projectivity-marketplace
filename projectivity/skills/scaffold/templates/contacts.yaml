@@ -1,0 +1,20 @@
+# Project-scoped contacts. Internal team lives in the vault-root team.yaml.
+# Fields match team.yaml: name, korean_name, email, slack, slack_name, github, linear, role, org.
+# `org` is the customer-side company when applicable.
+# `korean_name` is a first-class lookup field in resolve_name.py — populate it whenever a
+# contact is commonly referenced by their Korean name in Slack/meetings.
+
+contacts: []
+
+# Example (remove the `[]` above and uncomment to use):
+# contacts:
+#   - name: Hyebin Park
+#     korean_name: 박혜빈
+#     email: hyebin@jobisnvillains.com
+#     role: Infrastructure lead
+#     org: Jobis & Villains
+#   - name: Minjun Kim
+#     korean_name: 김민준
+#     slack: U07ABCXYZ
+#     role: Customer PM
+#     org: Jobis & Villains

@@ -47,7 +47,7 @@ def md_files(proj: Path):
 
 def jsonl_files(proj: Path):
     for name in ("decisions.jsonl", "actions.jsonl"):
-        p = proj / name
+        p = proj / "core" / name
         if p.exists():
             yield p
 

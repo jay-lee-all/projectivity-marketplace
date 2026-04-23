@@ -31,7 +31,7 @@ def main() -> None:
     args = ap.parse_args()
 
     proj = project_root(args.project, args.path)
-    dec_path = proj / "decisions.jsonl"
+    dec_path = proj / "core" / "decisions.jsonl"
 
     made: dict[str, dict] = {}
     retired: set[str] = set()

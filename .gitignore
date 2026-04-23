@@ -4,3 +4,7 @@ __pycache__/
 *.pyo
 .venv/
 venv/
+
+# Local planning notes — not repo content
+/curate-improvements.md
+/scaffold-improvements.md

@@ -44,7 +44,7 @@ python "$CLAUDE_PLUGIN_DIR/scripts/active_decisions.py" --project <slug> --since
 ```
 
 ### 5. Upcoming milestones (next 14 days)
-Read `projects/<slug>/timeline.yaml`; filter `milestones:` where `date` ≤ today+14. Include target date and owner.
+Read `projects/<slug>/core/timeline.yaml`; filter `milestones:` where `date` ≤ today+14. Include target date and owner.
 
 ## Footer
 
