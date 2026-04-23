@@ -46,10 +46,12 @@ Shape: `type: decision-dropped`, `from` **required** and pointing to the raised 
 
 ## Action — task-created
 
-Something the PM needs to do that **Linear doesn't track**. Engineering tickets stay in Linear; PM-layer work comes here.
+A task the **project** needs to track at the PM layer — regardless of who owns it. Engineering work that lives fully inside Linear stays there; what comes here are the project-visible events: an engineer completing a deployment push, a customer requesting infrastructure changes, a PM scheduling a follow-up, a cross-team coordination ask. The test: **"is this a project event, or is it an individual's ticket?"**
 
 Triggers:
 - "Jay will send the requirements doc."
+- "Engineer is driving the overnight prod stabilization push."
+- "Customer DevOps is requesting MFA account provisioning."
 - "Schedule the follow-up meeting."
 - "Review the competitor demo."
 - "Follow up with 김철수 next week."
@@ -61,13 +63,28 @@ Triggers:
 
 ## Action — communication
 
-A significant communication event worth finding 3 months from now.
+A significant communication event worth finding 3 months from now. Communications are the noisiest type — apply **both** tests before filing:
 
-Test: **would I need to find this later?** If yes, log it. A Slack "sounds good" fails the test; sending the contract to the customer passes.
+1. **Would I need to find this 3 months from now?**
+2. **Does this carry information not already captured by a decision, action, or risk in this plan?** If the answer is already filed as `[dec-NNN]`, don't also file a communication saying "someone asked about it." The decision is the record; the Slack thread is the color.
+
+Signal (file these):
+- Engineer sharing a deployment completion report with the customer.
+- Customer infrastructure team requesting a security architecture diagram.
+- Customer DevOps requesting MFA account provisioning.
+- PM sharing document-management guidelines post-incident.
+
+Noise (skip):
+- Engineer asking a teammate how to use a tool (support, not project event).
+- "Sounds good" / "thanks" acknowledgments.
+- Dashboard link requests (operational, not strategic).
+- Internal pings asking "is X confirmed?" when X is already filed as a decision.
+
+**Customer acceptance / feedback is always signal.** When a customer confirms a deliverable meets requirements, rejects it, or gives substantive quality feedback, always file it — these are among the hardest events to reconstruct later and the most valuable for retrospectives and future scoping. Examples: "customer tested RAG agent on 50 queries, accuracy acceptable for pilot"; "customer rejected OCR quality, requested re-processing."
 
 ## Action — milestone
 
-A project milestone reached. Pair with a move in `timeline.yaml` (milestone entry moves from `milestones:` to `done:` with `completed` date).
+A project milestone reached. **Must be paired with a `timeline.yaml` update in the same curate plan** — move the milestone from `milestones:` to `done:` with a `completed:` date. Curate's write-order handles this; don't file a `milestone` action without the yaml move, or the two halves drift.
 
 Triggers:
 - "MVP deployed to staging."

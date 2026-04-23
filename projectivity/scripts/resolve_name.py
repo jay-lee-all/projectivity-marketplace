@@ -33,7 +33,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _common import emit, fail, load_yaml  # noqa: E402
 
 
-LOOKUP_FIELDS = ("name", "email", "slack", "slack_name", "github", "linear")
+LOOKUP_FIELDS = ("name", "korean_name", "email", "slack", "slack_name", "github", "linear")
 
 
 def normalize(s) -> str:

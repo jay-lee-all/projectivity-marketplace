@@ -64,19 +64,26 @@ Every decisions.jsonl entry carries `type`. Three values:
 
 Fields for decisions.jsonl: `id`, `type`, `when`, `question` | `decision`, `context`, `who`, `checked` (optional array), `from`, `links`, `retires`. See `filing-triggers.md` for "is this a decision-raised or a decision-made" judgment.
 
+`who` is a **string** for the common single-owner case, or an **array of strings** when the event is genuinely co-owned. Single-element arrays are a smell — use a plain string. `checked` is always an array (it's a reviewer list, not an owner).
+
 ## Action types (actions.jsonl only)
 
 Every actions.jsonl entry carries `type`. Seven values:
 
 `task-created | task-done | task-blocked | communication | milestone | milestone-shifted | note`
 
-Fields: `id`, `when`, `type`, `what`, `who`, `from`, `links`, `retires`.
+Fields: `id`, `when`, `type`, `what`, `who`, `from`, `links`, `retires`. `who` shape matches decisions: string for single ownership, array of strings for genuine co-ownership.
 
 Lifecycle patterns:
 - Simple completion: `task-done` with `from: "[act-NNN]"` pointing to the original `task-created`.
 - Block-then-complete: later `task-done` points `from` to the original `task-created`, NOT the `task-blocked`.
 - Block-then-replace: the replacement `task-created` has `retires: ["[act-created]", "[act-blocked]"]` — include BOTH. Missing either leaves ghosts.
 - Milestone retires tasks: `{type: milestone, retires: ["[act-NNN]", ...]}` when reaching the milestone makes tasks obsolete.
+
+Type constraints on `from` (file-level — the validator surfaces these as warnings):
+- `task-done.from` **must point to a `task-created`**, never a milestone, note, or communication. If the event you're closing has no `task-created` upstream, either reclassify it (likely a `communication` or `note`) or file the missing `task-created` retroactively in the same plan.
+- `task-blocked.from` has the same constraint.
+- A single `task-created` should have **at most one** closure — either one `task-done` or a `retires` from a milestone, never both, and never two `task-done`s. Two closures pointing at the same `task-created` mean the original was too broad; split it.
 
 `milestone-shifted`: the `what` field must contain old date, new date, and reason. The shifted milestone is referenced as `ms-NNN` inline in `what` (timeline IDs are not bracket IDs).
 
@@ -94,8 +101,11 @@ When a `decision-made` spawns actions, include the decision's bracket ID in each
 - [ ] Type-specific required fields are present (see type tables above).
 - [ ] `when` is naive ISO 8601 (`YYYY-MM-DDTHH:MM:SS`, no offset).
 - [ ] Names in `who` and `checked` match `team.yaml` or `contacts.yaml` exactly.
+- [ ] `who` is a plain string for single ownership; array only when genuinely co-owned.
 - [ ] No empty strings, no empty arrays, no nulls.
 - [ ] `retires` entries are same-schema bracket IDs.
 - [ ] For `decision-made` that resolves a raised question: `from` points to `[dec-NNN]` of the raised entry.
 - [ ] For `decision-dropped`: `from` is present and points to the raised entry being dropped.
 - [ ] Every action that came from a decision has that decision's bracket ID in `links`.
+- [ ] `task-done.from` / `task-blocked.from` targets are `task-created` entries (file-level check).
+- [ ] No `task-created` has multiple `task-done` closures.
