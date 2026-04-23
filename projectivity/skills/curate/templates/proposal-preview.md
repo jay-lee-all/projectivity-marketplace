@@ -7,6 +7,14 @@ The format below is the contract. Keep section order stable; PMs get faster at r
 ## Format
 
 ```
+## Low-confidence items
+(Only present on `--backfill` runs that produced flagged items — otherwise omit this section entirely, headers and all. Lists items any subagent marked as ambiguous judgment calls: "decision or risk?", unresolved names, temp-mitigation language the subagent wasn't sure how to categorize. PMs skim here first; the rest of the plan is "trust and approve.")
+
+- [<bracket-id>] (<what-kind>): <one-line description>
+    flagged by: window <N>
+    reason: <what the subagent was uncertain about>
+    proposed filing: <how the subagent ultimately filed it — PM can accept, edit, or override>
+
 ## Source(s)
 
 - <one line per source>: meeting MD path, Slack thread identifier, Linear export range, email from-date, or "manual notes".
@@ -47,6 +55,13 @@ The format below is the contract. Keep section order stable; PMs get faster at r
 - [act-NNN] (note): <what>
     from: [[meetings/...]]         ← optional
 
+## Timeline updates
+
+- ms-NNN: moved to `done:`, completed: YYYY-MM-DD (driven by [act-NNN])
+- ms-NNN: `when:` shifted YYYY-MM-DD → YYYY-MM-DD (driven by [act-NNN])
+
+(Omit the section entirely if the plan has no `milestone` or `milestone-shifted` actions — same rule as other empty sections in this template.)
+
 ## Requirement updates
 
 - [[requirements/<slug>]]: <field change> — e.g. status `active` → `in-progress`
@@ -84,5 +99,7 @@ The format below is the contract. Keep section order stable; PMs get faster at r
 
 - Every bracket ID in the plan must come from `next_id.py`, not invented. If the plan shows `[dec-042]` pointing at `[dec-041]`, allocate 041 first.
 - Every JSONL line in the plan should pre-validate via `validate_jsonl.py --line ... --kind decisions|actions`. Flagging errors at the plan stage is cheaper than after the write.
-- Write order at confirmation time: meeting MD (if new) → decisions → actions → requirement updates → risk MDs. Cross-references resolve cleanly because dependencies exist first.
+- Write order at confirmation time: meeting MD (if new) → decisions → actions → `timeline.yaml` updates (for any `milestone` / `milestone-shifted` action) → requirement updates → risk MDs. Cross-references resolve cleanly because dependencies exist first.
+- Any `milestone` / `milestone-shifted` action in the Actions section requires a matching Timeline updates entry — they're two halves of one change.
 - `retires` appears only on `decision-made` entries targeting other `decision-made` entries and only on actions targeting other actions. Never on raised/dropped decisions; never targeting MD entities.
+- **Backfill plans add a `## Low-confidence items` section at the top.** Normal (non-backfill) curate plans omit that section entirely — one source rarely produces enough ambiguity to warrant a dedicated top-of-plan callout. Backfill produces many entries across many windows, so concentrating the PM's review on flagged judgment calls keeps the skim-review tractable.

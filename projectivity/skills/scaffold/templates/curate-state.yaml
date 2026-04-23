@@ -1,0 +1,26 @@
+# Machine-maintained. Do not edit by hand.
+# Schema + contract: conventions/curate-state.md.
+# Read at the start of every curate run; updated after a successful write.
+
+sources:
+  slack_internal:
+    channel_id: {{internal_slack_id}}
+    last_message_ts: null
+  slack_external:
+    channel_id: {{external_slack_id}}
+    last_message_ts: null
+  linear:
+    project_name: {{linear_project_name}}
+    last_issue_updated_at: null
+
+last_run:
+  mode: null
+  when: null
+
+# Rules for scaffold substitution:
+# - Omit a `sources` block entry entirely if its elicitation value is blank
+#   (e.g. no external Slack channel → drop the `slack_external` block; do not
+#   leave the key with an empty `channel_id`).
+# - Omit the `email` block by default; it's opt-in per project.
+# - `last_run.mode` and `last_run.when` stay null until curate completes its
+#   first run against this project.
